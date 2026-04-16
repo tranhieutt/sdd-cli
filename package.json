@@ -1,6 +1,6 @@
 {
   "name": "create-sdd",
-  "version": "1.30.0",
+  "version": "1.31.0",
   "description": "Scaffold a Claude Code Software Development Department into any project",
   "keywords": [
     "claude",

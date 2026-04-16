@@ -1,16 +1,18 @@
 ﻿---
 name: save-state
-description: "Saves current working context to production/session-state/active.md to survive context compaction, /clear, or session restart. Run before any major context reset, when context usage exceeds 60%, or when ending a work session."
-argument-hint: "[optional note]"
+description: "Saves current working context to production/session-state/active.md and creates an atomic checkpoint in .tasks/checkpoints/ to survive context compaction, /clear, or session restart. Essential for MAS fault tolerance (Upgrade #1)."
+argument-hint: "[optional task_id] [optional note]"
 user-invocable: true
 allowed-tools: Read, Write, Glob, Bash
 effort: 3
-when_to_use: "Use before any major context reset, when context usage exceeds 60%, or when ending a session to preserve working context across compaction or restart."
+when_to_use: "Use before any major context reset, when context usage exceeds 60%, or when ending a session to preserve working context across compaction or restart. Mandatory before handoffs."
 ---
 
-Dump the current working context into `production/session-state/active.md` as a structured checkpoint.
+# Save State Skill
 
-This file is automatically read by `session-start.sh` at the next session start and surfaced by `pre-compact.sh` before context compaction.
+Dump the current working context into `production/session-state/active.md` and a unique checkpoint in `.tasks/checkpoints/`.
+
+This mechanism ensures MAS fault tolerance by allowing immediate resumption from specific task states.
 
 ## Steps
 
@@ -18,30 +20,33 @@ This file is automatically read by `session-start.sh` at the next session start 
 
 Before writing anything, collect the following from the current conversation and working state:
 
+- **Task ID**: Extract from conversation or use `$ARGUMENTS` (e.g., NNN).
 - **Current task**: What is the primary task being worked on right now?
 - **Progress**: What has been completed in this session? List key milestones.
-- **Decisions made**: What architectural, design, or implementation decisions were made? (These are the most important to preserve.)
-- **Files modified**: Run `git diff --name-only && git diff --staged --name-only && git ls-files --others --exclude-standard` to get the current working tree state.
+- **Decisions made**: What architectural, design, or implementation decisions were made?
+- **Files modified**: Run `git diff --name-only && git diff --staged --name-only` to get the current working tree state.
 - **Open questions**: What is unresolved or blocked?
 - **Next step**: What is the very next action to take when resuming?
 
-If `$ARGUMENTS` is provided, append it as an additional note in the "Notes" section.
+### 2. Extract Durable Memory
 
-### 2. Extract Durable Memory (Native System)
-Are there any lessons learned, coding patterns established, constraints added, or technical decisions made in this session that apply globally to the project?
-If so, before writing active.md, extract them to the `.claude/memory/` directory:
-- Write or update a specific topic file (e.g. `project_tech_decisions.md` or `feedback_rules.md`), ensuring it has the required YAML frontmatter (`name`, `description`, `type`).
-- Update `.claude/memory/MEMORY.md` with a pointer to that file if it's not already listed.
+Are there any lessons learned, coding patterns established, or technical decisions made in this session that apply globally to the project?
+If so, before writing checkpoints:
+- Write or update a topic file in `.claude/memory/specialists/` or `.claude/memory/`.
+- Update `.claude/memory/MEMORY.md` if necessary.
 
-### 3. Write `production/session-state/active.md`
+### 3. Write State files
 
-Overwrite the file with this structure:
+1. Overwrite `production/session-state/active.md` with the structure below.
+2. Create a new unique file in `.tasks/checkpoints/` named `[task_id]-[agent_id]-[timestamp].md` with the same content.
 
 ```markdown
-# Session State
+# Session State / MAS Checkpoint
 
 > Saved: [ISO timestamp]
 > Branch: [current git branch]
+> Task ID: [task_id]
+> Agent ID: [your agent role name]
 
 ## Current Task
 
@@ -81,10 +86,12 @@ Task: [specific task or leave blank]
 ### 4. Confirm
 
 Print:
-```
+
+```text
 Session state saved to production/session-state/active.md
+Atomic checkpoint created in .tasks/checkpoints/[filename].md
 [If memory was extracted]: Durable memories extracted to .claude/memory/MEMORY.md
-Resume with: read active.md first to recover full context.
+Resume with: /resume-from [Task_ID] or read active.md.
 ```
 
 ---
@@ -95,7 +102,4 @@ Resume with: read active.md first to recover full context.
 - When context usage feels high (>60%)
 - After completing a major milestone (phase, feature, design section)
 - Before ending a work session
-- When `pre-compact.sh` warns about no active session state
-
-> The `session-start.sh` hook automatically detects and previews `active.md` at the start of each new session.
-> The `pre-compact.sh` hook reads it before compaction to inject it into the summary.
+- **Mandatory** before any Agent-to-Agent handoff.
