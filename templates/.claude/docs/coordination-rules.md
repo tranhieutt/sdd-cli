@@ -6,7 +6,8 @@
    but must not make binding decisions outside their domain.
 3. **Conflict Resolution**: When two agents disagree, escalate to the shared
    parent. If no shared parent, escalate to `cto` for design
-   conflicts or `technical-director` for technical conflicts.
+   conflicts or `technical-director` (Consensus Hub) for technical
+   conflicts and global memory consolidation.
 4. **Change Propagation**: When a design change affects multiple domains, the
    `producer` agent coordinates the propagation.
 5. **No Unilateral Cross-Domain Changes**: An agent must never modify files

@@ -11,6 +11,13 @@
 - Last session: 2026-04-13 12:09 · agents=1 · commits=1
 - Current focus: _(agent fills in at session start)_
 
+## Tier 1.5 — Specialist Memory (Namespace Isolation)
+
+> **Upgrade #2:** Load ONLY the memory file of specialists involved in the task.
+
+- Specialists Directory: `.claude/memory/specialists/`
+- [Agent Name].md (e.g., `backend-developer.md`, `qa-tester.md`)
+
 ## Tier 2 — Load On Demand (max 3 files per session)
 
 <!-- Keyword match is NOT enough — use the Load Decision Matrix in context-management.md -->

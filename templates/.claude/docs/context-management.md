@@ -112,6 +112,14 @@ decisions), use Claude's native memory in `.claude/memory/`.
   Save insights only. If unsure — skip it.
 - If `MEMORY.md` gets too long, trigger `/dream` to auto-consolidate.
 
+### 🧠 Specialist Memory (Namespace Isolation)
+To prevent "Context Pollution", SDD uses a decoupled memory tier for specialist agents.
+
+**RULES for Specialist Memory:**
+1. **Scoped Loading:** Load ONLY the file in `.claude/memory/specialists/[your_role].md` at your turn.
+2. **Context Partitioning:** Specialists must NOT read other specialist memories unless explicitly instructed by the Orchestrator.
+3. **Consensus Sync:** Upon completing a task, the specialist should suggest insights to the `@technical-director` (Consensus Hub) to be promoted to global `MEMORY.md`.
+
 ### 🌐 MCP Supermemory Integration (Cloud/Semantic Memory)
 SDD integrates with the `supermemory` MCP Server to offload deep, historical knowledge without cluttering the local file system. 
 

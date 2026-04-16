@@ -5,6 +5,15 @@ All notable changes to the **SDD CLI** project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.32.0] - 2026-04-16
+
+### Added
+
+- **Implementation of Upgrade #2: Namespace Isolation**:
+  - New specialized memory tier for agents in `.claude/memory/specialists/`.
+  - Incremental loading rules in `context-management.md` to reduce context pollution.
+  - Designated `@technical-director` as the Consensus Hub for memory consolidation.
+
 ## [1.31.0] - 2026-04-16
 
 ### Added
@@ -18,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.30.0] - 2026-04-16
 
 ### Initial MAS Upgrade
+
 - **Multi-Agent Systems (MAS) Infrastructure Upgrade**:
   - New directory structure for MAS observability and fault tolerance.
   - `templates/.claude/docs/handoff-schema.md`: Standardized A2A communication contract.
