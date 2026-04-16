@@ -11,29 +11,40 @@
    `producer` agent coordinates the propagation.
 5. **No Unilateral Cross-Domain Changes**: An agent must never modify files
    outside its designated directories without explicit delegation.
-6. **Layered Recovery Before Escalation**: Before surfacing a blocker to the user,
+6. **MAS Circuit Breaker Pattern**: To prevent token waste and infinite retry
+   loops (Upgrade #5):
+   - If an agent fails a specific task 3 times consecutively → **OPEN** state.
+   - In **OPEN** state, the agent MUST stop and escalate to `@technical-director`.
+   - The Orchestrator may route the task to a **Fallback Specialist** (e.g.,
+     `@backend-developer` → `@fullstack-developer`).
+   - After a cooldown period or system reset, enter **HALF-OPEN** for one test run.
+7. **Atomic Checkpointing protocol**: Before any major context rotation or
+   handoff (Upgrade #1):
+   - Run `/save-state` to persist the cognitive snapshot in `.tasks/checkpoints/`.
+   - Snapshot MUST include: current sub-goals, identified blockers, and draft work.
+8. **Layered Recovery Before Escalation**: Before surfacing a blocker to the user,
    agents must attempt recovery in this order — from least to most disruptive:
    1. Re-read the relevant files and retry with fresh context
    2. Delegate to a specialized subagent with the full diagnosis in the prompt
    3. Run `/compact` if context may be stale, then retry once more
    4. Only after all three fail → surface to user with every attempted step documented
-7. **Subagent Concurrency Classification**: Before spawning multiple subagents,
+9. **Subagent Concurrency Classification**: Before spawning multiple subagents,
    classify each by its side-effect profile:
    - **Concurrent-safe** (read-only — no file writes, no commands): Explore, research,
      Grep/Glob/Read agents → batch and run in parallel
    - **State-modifying** (writes files, runs commands, modifies DB): backend-developer,
      frontend-developer, data-engineer → run sequentially, never overlap on the same domain
-8. **Withheld Error Pattern**: Agents must not surface intermediate errors directly to
-   the user. Apply layered recovery (Rule 6) first. Only expose the error when all
+10. **Withheld Error Pattern**: Agents must not surface intermediate errors directly to
+   the user. Apply layered recovery (Rule 8) first. Only expose the error when all
    recovery options are exhausted — include the full recovery attempt history in the
    report so the user can understand what was tried.
-9. **Fail-Open for Optional Agents**: Any subagent handling a background or optional
-   task (memory extraction, summary generation, documentation update) must fail-open:
-   - If the subagent fails, errors out, or times out → log the failure in `active.md`
-     and continue the main workflow without blocking
-   - Never let an optional background agent gate a required foreground task
-   - Background failures are surfaced as warnings, not blockers
-10. **Worktree Isolation for Risky Changes**: Use `isolation: 'worktree'` for any
+11. **Fail-Open for Optional Agents**: Any subagent handling a background or optional
+    task (memory extraction, summary generation, documentation update) must fail-open:
+    - If the subagent fails, errors out, or times out → log the failure in `active.md`
+      and continue the main workflow without blocking
+    - Never let an optional background agent gate a required foreground task
+    - Background failures are surfaced as warnings, not blockers
+12. **Worktree Isolation for Risky Changes**: Use `isolation: 'worktree'` for any
     subagent task that carries risk of breaking working code:
     - Large refactors touching 5+ files
     - Experimental approaches not yet validated
@@ -41,7 +52,7 @@
     - Changes the agent is not confident about
     The worktree gives a fully isolated copy — review the diff, merge if good, discard
     if not. Never let uncertainty be a reason to avoid attempting a task.
-11. **Permission Mode Selection**: Choose the appropriate permission mode before
+13. **Permission Mode Selection**: Choose the appropriate permission mode before
     starting a task — do not default to the most permissive mode:
     - `plan` — explore and review code without any writes or command execution
     - `default` — normal development; prompt before each side-effecting tool call
@@ -50,7 +61,7 @@
       whitelist specified explicitly
     Never use `bypassPermissions` interactively. Prefer `plan` mode for all
     read-only research tasks to prevent accidental writes.
-12. **Verifiable Plan Format**: For any multi-step task, present a plan before
+14. **Verifiable Plan Format**: For any multi-step task, present a plan before
     implementing. Each step must include an inline verification criterion:
 
     ```text

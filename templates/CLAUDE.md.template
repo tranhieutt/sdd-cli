@@ -19,6 +19,13 @@ If the user invokes these short commands, or if the task context implies them, Y
 - **`/tdd`**: ALWAYS trigger the `test-driven-development` skill when writing the source. Write failing tests, check CMD outputs (🔴 RED), implement, and pass (🟢 GREEN). **Never claim success without terminal test logs.**
 - **`/context`** or **`/memory`**: ALWAYS trigger the `context-engineering` skill. Diagnose context stuffing, optimize persistent vs episodic knowledge, and enforce the Research-Plan-Reset-Implement cycle using `mcp_supermemory` tools.
 
+### 🚀 MAS Infrastructure Commands (Upgrade v1.30)
+- **`/save-state`**: Save atomic checkpoint to `.tasks/checkpoints/` before context rotation.
+- **`/resume-from [Task_ID]`**: Load cognitive state from a previous checkpoint.
+- **`/handoff [to_agent]`**: Generate A2A Handoff Contract for the next specialist.
+- **`/trace-history`**: View the `decision_ledger.jsonl` timeline.
+- **`/agent-health`**: Display performance metrics from `agent-metrics.jsonl`.
+
 
 ## Project Durable Memory
 
@@ -41,6 +48,10 @@ If the user invokes these short commands, or if the task context implies them, Y
 ## Project Structure
 
 @.claude/docs/directory-structure.md
+
+## Agent Communication (A2A)
+
+@.claude/docs/handoff-schema.md
 
 ## Technical Preferences
 
